@@ -8,13 +8,7 @@ pipeline {
     }
 */
     stages {
-
-        stage("Checkout") {
-            steps {
-                git branch: "ci-jenkins", url: "https://github.com/Ujwal-s-Projects/vprofile-project.git"
-            }
-        }
-
+        
         stage("Build") {
             steps {
                 sh 'mvn clean install -DskipTests'
