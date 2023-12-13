@@ -7,11 +7,22 @@ pipeline {
         sonarqube "sonarscanner"
     }
 */
+    environment {
+        NEXUS_USER = "admin"
+        NEXUS_PASS = "admin"
+        RELEASE_REPO = "vprofile-release"
+        CENTRAL_REPO = "vpro-maven-central"
+        SNAP_REPO = "vprofile-snapshop" 
+        NEXUSIP = "172.31.0.147" 
+        NEXUS_PORT = "8081"
+        NEXUS_GRP_REPO = "vpro-maven-group"
+        NEXUS_LOGIN = "nexuslogin" 
+    }
     stages {
 
         stage("Build") {
             steps {
-                sh 'mvn clean install -DskipTests'
+                sh 'mvn -s settings.xml install -DskipTests'
             }
             post {
                 success {
@@ -23,19 +34,19 @@ pipeline {
 
         stage("Unit_Test") {
             steps {
-                sh 'mvn test'
+                sh 'mvn -s settings.xml test'
             }
         }
 
         stage("Integration_Test") {
             steps {
-                sh 'mvn verify -DskipUnitTests'
+                sh 'mvn -s settings.xml verify -DskipUnitTests'
             }
         }
 
         stage("Code_Analysis_With_Checkstyle") {
             steps {
-                sh 'mvn checkstyle:checkstyle'
+                sh 'mvn -s settings.xml checkstyle:checkstyle'
             }
         }
     }
