@@ -6,12 +6,13 @@ def COLOR_MAP = [
 pipeline {
     agent any 
 
-/*
+
     tools {
         maven "MAVEN3"
         sonarqube "sonarscanner"
+        openJDK "JAVA11"
     }
-*/
+
     environment {
         NEXUS_USER = "admin"
         NEXUS_PASS = "admin"
@@ -25,6 +26,7 @@ pipeline {
         SONARSERVER = "sonarserver"
         SONARSCANNER = "sonarscanner"
     }
+    
     stages {
 
         stage("Build") {
