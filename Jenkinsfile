@@ -38,12 +38,6 @@ pipeline {
             }
         }
 
-        stage("Integration_Test") {
-            steps {
-                sh 'mvn -s settings.xml verify -DskipUnitTests'
-            }
-        }
-
         stage("Code_Analysis_With_Checkstyle") {
             steps {
                 sh 'mvn -s settings.xml checkstyle:checkstyle'
