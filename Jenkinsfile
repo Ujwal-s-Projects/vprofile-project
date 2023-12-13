@@ -1,6 +1,6 @@
 pipeline {
     agent any 
-    
+
 /*
     tools {
         maven "MAVEN3"
@@ -17,19 +17,19 @@ pipeline {
 
         stage("Build") {
             steps {
-                sh 'mvn -s settings.xml install -DskipTests'
+                sh 'mvn install -DskipTests'
             }
         }
 
         stage("Unit_Test") {
             steps {
-                sh 'mvn -s settings.xml test'
+                sh 'mvn test'
             }
         }
 
         stage("Integration_Test") {
             steps {
-                sh 'mvn verify'
+                sh 'mvn verify -DskipUnitTests'
             }
         }
 
