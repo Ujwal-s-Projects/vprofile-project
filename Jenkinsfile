@@ -6,11 +6,9 @@ def COLOR_MAP = [
 pipeline {
     agent any 
 
-/*
     tools {
         maven "MAVEN3"
     }
-*/
 
     environment {
         NEXUS_USER = "admin"
@@ -32,6 +30,7 @@ pipeline {
             steps {
                 git branch: 'ci-jenkins', url: 'https://github.com/Ujwal-s-Projects/vprofile-project.git'
             }
+        }
 
         stage("Build") {
             steps {
@@ -111,7 +110,6 @@ pipeline {
                 color: COLOR_MAP[currentBuild.currentResult],
                 message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n more info at: ${env.BUILD_URL}"
 
-            }
         }
     }
 }
