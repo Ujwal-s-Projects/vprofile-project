@@ -6,12 +6,11 @@ def COLOR_MAP = [
 pipeline {
     agent any 
 
-
+/*
     tools {
         maven "MAVEN3"
-        sonarqube "sonarscanner"
-        openJDK "JAVA11"
     }
+*/
 
     environment {
         NEXUS_USER = "admin"
@@ -26,8 +25,13 @@ pipeline {
         SONARSERVER = "sonarserver"
         SONARSCANNER = "sonarscanner"
     }
-    
+
     stages {
+
+        stage("Checkout") {
+            steps {
+                git branch: 'ci-jenkins', url: 'https://github.com/Ujwal-s-Projects/vprofile-project.git'
+            }
 
         stage("Build") {
             steps {
@@ -99,6 +103,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             echo 'slack notification'
