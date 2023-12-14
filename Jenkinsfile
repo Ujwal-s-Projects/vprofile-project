@@ -101,7 +101,10 @@ pipeline {
 
     post {
         always {
-            slackSend botUser: true, channel: '#jenkins-ci_cd', color: 'good', failOnError: true, iconEmoji: 'white_check_mark', message: 'this is notification by jenkins ', teamDomain: 'Uj5Ghare', tokenCredentialId: 'slack-token', username: 'jenkins'
+            echo 'slack notification'
+            slackSend channel: '#slackpractice',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n more info at: ${env.BUILD_URL}"
         }
     }
 }
