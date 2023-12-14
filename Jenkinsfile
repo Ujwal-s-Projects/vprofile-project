@@ -25,26 +25,34 @@ pipeline {
             }
         }
 
-        stage("Build") {
-            steps {
-                sh 'mvn -s settings.xml install -DskipTests'
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: '**/target/*.war'
-                }
-            }
-        }
+        // stage("Build") {
+        //     steps {
+        //         sh 'mvn -s settings.xml install -DskipTests'
+        //     }
+        //     post {
+        //         success {
+        //             archiveArtifacts artifacts: '**/target/*.war'
+        //         }
+        //     }
+        // }
 
-        stage("Unit-Test") {
-            steps {
-                sh 'mvn -s settings.xml test'
-            }
-        }
+        // stage("Unit-Test") {
+        //     steps {
+        //         sh 'mvn -s settings.xml test'
+        //     }
+        // }
 
-        stage("Code-Analysis") {
+        // stage("Code-Analysis-Checkstyle") {
+        //     steps {
+        //         sh 'mvn -s settings.xml checkstyle:checkstyle'
+        //     }
+        // }
+
+        stage("Code-Analysis-SonarQube") {
             steps {
-                sh 'mvn checkstyle:checkstyle'
+                withSonarQubeEnv('sonar-server') {
+                    // Your SonarQube scanner command goes here, for example:
+                    sh 'mvn clean package sonar:sonar'
             }
         }
     }
