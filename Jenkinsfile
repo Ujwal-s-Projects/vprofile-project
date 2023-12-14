@@ -71,7 +71,7 @@ pipeline {
         }
         stage("Quality_Gates") {
             steps {
-                timeout(10) {
+                timeout(time: 10, unit: "MINUTES") {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -97,5 +97,8 @@ pipeline {
 
             }
         }
+    }
+    post {
+        slackSend botUser: true, channel: '#jenkins-ci_cd', color: 'good', failOnError: true, iconEmoji: 'white_check_mark', message: 'this is notification by jenkins ', teamDomain: 'Uj5Ghare', tokenCredentialId: 'slack-token', username: 'jenkins'
     }
 }
