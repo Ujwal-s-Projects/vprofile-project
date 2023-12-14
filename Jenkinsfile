@@ -72,10 +72,30 @@ pipeline {
         stage("Quality_Gates") {
             steps {
                 timeout(10) {
-                    waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
-    
+
+        stage("Nexus_Artifact") {
+            steps {
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
+                    groupId: 'My-App',
+                    version: "${env.BUILD_ID}",
+                    repository: "${NEXUS_RELEASE}",
+                    credentialsId: "${NEXUS_LOGIN}",
+                    artifacts: [
+                        [artifactId: 'My-App',
+                         classifier: '',
+                         file: 'target/vprofile-v2.war',
+                         type: 'war']
+                    ]
+                )
+
+            }
+        }
     }
 }
