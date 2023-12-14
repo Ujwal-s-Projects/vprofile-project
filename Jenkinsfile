@@ -90,7 +90,7 @@ pipeline {
                     nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
                     groupId: 'My-App',
                     version: "${env.BUILD_ID}",
-                    repository: "${NEXUS_RELEASE}",
+                    repository: "${RELEASE_REPO}",
                     credentialsId: "${NEXUS_LOGIN}",
                     artifacts: [
                         [artifactId: 'My-App',
