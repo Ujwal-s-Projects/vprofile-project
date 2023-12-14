@@ -98,7 +98,10 @@ pipeline {
             }
         }
     }
+
     post {
-        slackSend botUser: true, channel: '#jenkins-ci_cd', color: 'good', failOnError: true, iconEmoji: 'white_check_mark', message: 'this is notification by jenkins ', teamDomain: 'Uj5Ghare', tokenCredentialId: 'slack-token', username: 'jenkins'
+        always {
+            slackSend botUser: true, channel: '#jenkins-ci_cd', color: 'good', failOnError: true, iconEmoji: 'white_check_mark', message: 'this is notification by jenkins ', teamDomain: 'Uj5Ghare', tokenCredentialId: 'slack-token', username: 'jenkins'
+        }
     }
 }
