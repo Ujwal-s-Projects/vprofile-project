@@ -53,6 +53,7 @@ pipeline {
                 withSonarQubeEnv('sonar-server') {
                     // Your SonarQube scanner command goes here, for example:
                     sh 'mvn clean package sonar:sonar'
+                }
             }
         }
     }
