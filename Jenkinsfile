@@ -15,6 +15,8 @@ pipeline {
         NEXUS_GRP_REPO="my-group"
         CENTRAL_REPO="my-central"
         RELEASE_REPO="my-release"
+        SONARSCANNER="sonar-scanner"
+        SONARSERVER="sonar-server"
     }
 
     stages {
@@ -25,36 +27,48 @@ pipeline {
             }
         }
 
-        // stage("Build") {
-        //     steps {
-        //         sh 'mvn -s settings.xml install -DskipTests'
-        //     }
-        //     post {
-        //         success {
-        //             archiveArtifacts artifacts: '**/target/*.war'
-        //         }
-        //     }
-        // }
-
-        // stage("Unit-Test") {
-        //     steps {
-        //         sh 'mvn -s settings.xml test'
-        //     }
-        // }
-
-        // stage("Code-Analysis-Checkstyle") {
-        //     steps {
-        //         sh 'mvn -s settings.xml checkstyle:checkstyle'
-        //     }
-        // }
-
-        stage("Code-Analysis-SonarQube") {
+        stage("Build") {
             steps {
-                withSonarQubeEnv('sonar-server') {
-                    // Your SonarQube scanner command goes here, for example:
-                    sh 'mvn clean package sonar:sonar'
+                sh 'mvn -s settings.xml install -DskipTests'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/target/*.war'
                 }
             }
         }
+
+        stage("Unit-Test") {
+            steps {
+                sh 'mvn -s settings.xml test'
+            }
+        }
+
+        stage("Code-Analysis-Checkstyle") {
+            steps {
+                sh 'mvn -s settings.xml checkstyle:checkstyle'
+            }
+        }
+
+        stage('SonarQube-Analysis') {
+            environment {
+                scannerHome = tool "${SONARSCANNER}"
+            }
+            steps {
+                    withSonarQubeEnv("${SONARSERVER}") {
+                        sh '''${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=my-key \
+                        -Dsonar.projectName=my-project \
+                        -Dsonar.projectVersion=1.0 \
+                        -Dsonar.sources=src/ \
+                        -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                        -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                        -Dsonar.checkstyle.reportsPath=target/checkstyle-result.xml \
+                        -Dsonar.junit.reportsPath=target/surefire-reports/  
+                        '''
+                    }
+            }
+        }
+    
     }
 }
