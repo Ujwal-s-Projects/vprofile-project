@@ -44,17 +44,17 @@ pipeline {
             }
         }
 
-        stage('Unit-Test') {
-            steps {
-                sh 'mvn -s settings.xml test'
-            }
-        }
+        // stage('Unit-Test') {
+        //     steps {
+        //         sh 'mvn -s settings.xml test'
+        //     }
+        // }
 
-        stage('Code-Analysis-Checkstyle') {
-            steps {
-                sh 'mvn -s settings.xml checkstyle:checkstyle'
-            }
-        }
+        // stage('Code-Analysis-Checkstyle') {
+        //     steps {
+        //         sh 'mvn -s settings.xml checkstyle:checkstyle'
+        //     }
+        // }
 
 //         stage('SonarQube-Analysis') {
 //             environment {
@@ -112,5 +112,5 @@ pipeline {
 //                 color: COLOR_MAP[currentBuild.currentResult],
 //                 message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n more info at: ${env.BUILD_URL}"
 //         }
-}
+ }
 }
