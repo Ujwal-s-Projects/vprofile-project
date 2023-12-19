@@ -30,7 +30,7 @@ pipeline {
 
         stage("Unit_Test") {
             steps {
-                sh "mven3 test"
+                sh "mvn test"
             }
         }
 
@@ -39,8 +39,6 @@ pipeline {
                 sh "mvn checkstyle:checkstyle"
             }
         }
-
-        stage("Code_Analysis")
 
         stage("Slack_Notification") {
             steps {
