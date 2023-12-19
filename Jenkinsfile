@@ -21,6 +21,7 @@ pipeline {
         NEXUS_GRP_REPO = "group"
         NEXUS_RELEASE = "release"
         NEXUS_CENTRAL = "central"
+        NEXUS_SNAP = "snap"
     }
 
     stages {
@@ -32,7 +33,7 @@ pipeline {
 
         stage("Build") {
             steps {
-                sh "mvn -s settings.xml install -DskipTests"
+                sh "mvn -s settings.xml -DskipTests install"
             }
             post {
                 success {
@@ -83,7 +84,7 @@ pipeline {
                     protocol: 'http',
                     nexusUrl: "${NEXUS_IP}:${NEXUS_PORT}",
                     groupId: 'Vprofile-App',
-                    version: "${env.BUILD_ID}",
+                    version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
                     repository: "${NEXUS_RELEASE}",
                     credentialsId: "${NEXUS_LOGIN}",
                     artifacts: [
