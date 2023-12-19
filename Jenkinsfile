@@ -11,7 +11,7 @@ pipeline {
     }
 
     environment {
-        SONAR_SCANNER =tool "sonar-scanner"
+        SONAR_SCANNER = "sonar-scanner"
         SONAR_SERVER = "sonar-server"
     }
 
@@ -46,13 +46,22 @@ pipeline {
         }
 
         stage("Code_Analysis") {
+            environment {
+                scannerHome = tool "${SONAR_SCANNER}"
+            }
             steps {
-                withSonarQubeEnv("${SONAR_SERVER}") {
-                    sh ''' ${SONAR_SCANNER}/bin/sonar-scanner \
-                    -Dsonar.projectKey=vpro-key
-                    -Dsonar.projectName=vpro-project
-                    -Dsonar.projectVersion=1.0 '''
-                }
+                    withSonarQubeEnv("${SONAR_SERVER}") {
+                        sh '''${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=my-key \
+                        -Dsonar.projectName=my-project \
+                        -Dsonar.projectVersion=1.0 \
+                        -Dsonar.sources=src/ \
+                        -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                        -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                        -Dsonar.checkstyle.reportsPath=target/checkstyle-result.xml \
+                        -Dsonar.junit.reportsPath=target/surefire-reports/
+                        '''
+                    }
             }
         }
 
