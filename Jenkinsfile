@@ -35,5 +35,11 @@ pipeline {
                 sh "mvn checkstyle:checkstyle"
             }
         }
+
+        stage("Slack_Notification") {
+            steps {
+                slackSend channel: '#jenkins', message: 'success>>>>>>>'
+            }
+        }
     }
 }
