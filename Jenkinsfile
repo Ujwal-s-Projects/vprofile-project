@@ -13,7 +13,7 @@ pipeline {
     environment {
         SONAR_SCANNER = "sonar-token"
         SONAR_SERVER = "sonar-server"
-        SCANNER_HOME=tool 'sonar-scanner'
+        SCANNER_HOME=tool 'sonar-token'
     }
 
     stages {
@@ -49,7 +49,8 @@ pipeline {
         stage("Code_Analysis") {
             steps {
                     withSonarQubeEnv(credentialsId: "${SONAR_SCANNER}") {
-                        sh "mvn sonar:sonar"
+                        sh "${SCANNER_HOME}/bin/sonar-scanner \ 
+                            mvn sonar:sonar"
                 }
             }
         }
