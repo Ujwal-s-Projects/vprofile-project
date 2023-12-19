@@ -43,7 +43,7 @@ pipeline {
 
         stage("Unit_Test") {
             steps {
-                sh "mvnen2 -s settings.xml test"
+                sh "mvn -s settings.xml test"
             }
         }
 
@@ -68,17 +68,42 @@ pipeline {
             }
         }
 
+        stage("Quality_Gates") {
+            steps {
+                timeout(10){
+                    waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
+                }
+            }
+        }
+
         stage("Nexus_Artifact") {
             steps {
-                
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: '${NEXUS_IP}:${NEXUS_PORT}',
+                    groupId: 'Vprofile-App',
+                    version: '${env.BUILD_ID}',
+                    repository: '${NEXUS_RELEASE}',
+                    credentialsId: '${NEXUS_LOGIN}',
+                    artifacts: [
+                        [artifactId: 'vpro-app',
+                        classifier: '',
+                        file: 'target/vprofile-v2.war',
+                        type: 'war']
+                    ]
+                )
             }
         }
     }
+    
     post {
         always {
-            slackSend channel: '#jenkins',
-                color: COLOR_MAP[currentBuild.currentResult],
-                message: "${currentBuild.currentResult}: ${env.JOB_NAME} - ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
+            script {
+                slackSend channel: '#jenkins',
+                    color: COLOR_MAP[currentBuild.currentResult],
+                    message: "${currentBuild.currentResult}: ${env.JOB_NAME} - ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
+            }
         }
     }
 }
