@@ -13,6 +13,7 @@ pipeline {
     environment {
         SONAR_SCANNER = "sonar-token"
         SONAR_SERVER = "sonar-server"
+        SCANNER_HOME=tool 'sonar-scanner'
     }
 
     stages {
