@@ -57,9 +57,13 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONAR_SERVER}") {
                     sh ''' ${SONAR_SCANNER}/bin/sonar-scanner \
-                    -Dsonar.projectKey=vpro-key
-                    -Dsonar.projectName=vpro-project
-                    -Dsonar.projectVersion=1.0 '''
+                    -Dsonar.projectKey=vpro-key \
+                    -Dsonar.projectName=vpro-project \
+                    -Dsonar.projectVersion=1.0 \
+                    -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                    -Dsonar.checkstyle.reportsPath=target/checkstyle-results.xml \
+                    -Dsonar.junit.reportsPath=target/surefire-reports/ '''
                 }
             }
         }
