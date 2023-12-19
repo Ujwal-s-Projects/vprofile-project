@@ -48,8 +48,8 @@ pipeline {
 
         stage("Code_Analysis") {
             steps {
-                    withSonarQubeEnv(credentialsId: "${SONAR_SERVER}") {
-                        sh '''${SCANNER_HOME}/bin/sonar-scanner mvn sonar:sonar'''
+                    withSonarQubeEnv("${SONAR_SERVER}") {
+                        sh 'mvn sonar:sonar'
                 }
             }
         }
