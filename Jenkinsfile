@@ -23,5 +23,17 @@ pipeline {
                 }
             }
         }
+
+        stage("Unit_Test") {
+            steps {
+                sh "mvn test"
+            }
+        }
+
+        stage("Checkstyle_Test") {
+            steps {
+                sh "mvn checkstyle:checkstyle"
+            }
+        }
     }
 }
