@@ -12,7 +12,7 @@ pipeline {
 
     environment {
         SONAR_SCANNER = "sonar-scanner"
-        SONAR_SERVER = "sonar-server"
+        SONAR_SERVER =tool "sonar-server"
     }
 
     stages {
