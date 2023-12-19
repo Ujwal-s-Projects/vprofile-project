@@ -11,8 +11,8 @@ pipeline {
     }
 
     environment {
-        SONAR_SCANNER = "sonar-scanner"
-        SONAR_SERVER =tool "sonar-server"
+        SONAR_SCANNER = tool "sonar-scanner"
+        SONAR_SERVER = "sonar-server"
         NEXUS_LOGIN = "nexus-login"
         NEXUS_USER = "admin"
         NEXUS_PASS = "admin"
