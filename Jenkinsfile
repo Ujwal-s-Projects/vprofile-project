@@ -47,8 +47,8 @@ pipeline {
 
         stage("Code_Analysis") {
             steps {
-                withSonarQubeEnv(credentialsId: "${SONAR_SCANNER}") {
-                    sh "mvn sonar:sonar"
+                    withSonarQubeEnv(credentialsId: "${SONAR_SCANNER}") {
+                        sh "mvn sonar:sonar"
                 }
             }
         }
