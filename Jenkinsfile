@@ -10,6 +10,11 @@ pipeline {
         maven "Maven3"
     }
 
+    environment {
+        SONAR_SCANNER = "sonar-token"
+        SONAR_SERVER = "sonar-server"
+    }
+
     stages {
         stage("Checkout") {
             steps {
@@ -36,7 +41,15 @@ pipeline {
 
         stage("Checkstyle_Test") {
             steps {
-                sh "mvnen3 checkstyle:checkstyle"
+                sh "mvn checkstyle:checkstyle"
+            }
+        }
+
+        stage("Code_Analysis") {
+            steps {
+                withSonarQubeEnv(credentialsId: "${SONAR_SCANNER}") {
+                    sh "mvn sonar:sonar"
+                }
             }
         }
 
