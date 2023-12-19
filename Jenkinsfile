@@ -12,7 +12,15 @@ pipeline {
 
     environment {
         SONAR_SCANNER = "sonar-scanner"
-        SONAR_SERVER = "sonar-server"
+        SONAR_SERVER =tool "sonar-server"
+        NEXUS_LOGIN = "nexus-login"
+        NEXUS_USER = "admin"
+        NEXUS_PASS = "admin"
+        NEXUS_IP = "172.31.42.81"
+        NEXUS_PORT = "8081"
+        NEXUS_GRP_REPO = "group"
+        NEXUS_RELEASE = "release"
+        NEXUS_CENTRAL = "central"
     }
 
     stages {
@@ -24,7 +32,7 @@ pipeline {
 
         stage("Build") {
             steps {
-                sh "mvn install -DskipTests"
+                sh "mvn -s settings.xml install -DskipTests"
             }
             post {
                 success {
@@ -35,33 +43,24 @@ pipeline {
 
         stage("Unit_Test") {
             steps {
-                sh "mvn test"
+                sh "mvn -s settings.xml test"
             }
         }
 
         stage("Checkstyle_Test") {
             steps {
-                sh "mvn checkstyle:checkstyle"
+                sh "mvn -s settings.xml checkstyle:checkstyle"
             }
         }
 
         stage("Code_Analysis") {
-            environment {
-                scannerHome = tool "${SONAR_SCANNER}"
-            }
             steps {
-                    withSonarQubeEnv("${SONAR_SERVER}") {
-                        sh '''${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=my-key \
-                        -Dsonar.projectName=my-project \
-                        -Dsonar.projectVersion=1.0 \
-                        -Dsonar.sources=src/ \
-                        -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                        -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                        -Dsonar.checkstyle.reportsPath=target/checkstyle-result.xml \
-                        -Dsonar.junit.reportsPath=target/surefire-reports/
-                        '''
-                    }
+                withSonarQubeEnv("${SONAR_SERVER}") {
+                    sh ''' ${SONAR_SCANNER}/bin/sonar-scanner \
+                    -Dsonar.projectKey=vpro-key
+                    -Dsonar.projectName=vpro-project
+                    -Dsonar.projectVersion=1.0 '''
+                }
             }
         }
 
