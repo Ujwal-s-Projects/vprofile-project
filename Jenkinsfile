@@ -67,13 +67,12 @@ pipeline {
                 }
             }
         }
-
-        stage("Slack_Notification") {
-            steps {
-                slackSend channel: '#jenkins',
-                    color: COLOR_MAP[currentBuild.currentResult],
-                    message: "${currentBuild.currentResult}: ${env.JOB_NAME} - ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
-            }
+    }
+    post {
+        always {
+            slackSend channel: '#jenkins',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "${currentBuild.currentResult}: ${env.JOB_NAME} - ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
         }
     }
 }
