@@ -70,7 +70,7 @@ pipeline {
 
         stage("Quality_Gates") {
             steps {
-                timeout(time: 10, unit: "MINUTES"){
+                timeout(10){
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -81,11 +81,11 @@ pipeline {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
-                    nexusUrl: '${NEXUS_IP}:${NEXUS_PORT}',
+                    nexusUrl: "${NEXUS_IP}:${NEXUS_PORT}",
                     groupId: 'Vprofile-App',
-                    version: '${env.BUILD_ID}',
-                    repository: '${NEXUS_RELEASE}',
-                    credentialsId: '${NEXUS_LOGIN}',
+                    version: "${env.BUILD_ID}",
+                    repository: "${NEXUS_RELEASE}",
+                    credentialsId: "${NEXUS_LOGIN}",
                     artifacts: [
                         [artifactId: 'vpro-app',
                         classifier: '',
