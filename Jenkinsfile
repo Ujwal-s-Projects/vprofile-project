@@ -43,7 +43,7 @@ pipeline {
 
         stage("Unit_Test") {
             steps {
-                sh "mvn -s settings.xml test"
+                sh "mvnen2 -s settings.xml test"
             }
         }
 
@@ -65,6 +65,12 @@ pipeline {
                     -Dsonar.checkstyle.reportsPath=target/checkstyle-results.xml \
                     -Dsonar.junit.reportsPath=target/surefire-reports/ '''
                 }
+            }
+        }
+
+        stage("Nexus_Artifact") {
+            steps {
+                
             }
         }
     }
