@@ -11,9 +11,8 @@ pipeline {
     }
 
     environment {
-        SONAR_SCANNER = "sonar-token"
+        SONAR_SCANNER = "sonar-scanner"
         SONAR_SERVER = "sonar-server"
-        SCANNER_HOME=tool 'sonar-scanner'
     }
 
     stages {
@@ -48,8 +47,11 @@ pipeline {
 
         stage("Code_Analysis") {
             steps {
-                    withSonarQubeEnv("${SONAR_SERVER}") {
-                        sh 'mvn sonar:sonar'
+                withSonarQubeEnv("${SONAR_SERVER}") {
+                    sh ''' ${SONAR_SCANNER}/bin/sonar-scanner \
+                    -Dsonar.projectKey=vpro-key
+                    -Dsonar.projectName=vpro-project
+                    -Dsonar.projectVersion=1.0 '''
                 }
             }
         }
