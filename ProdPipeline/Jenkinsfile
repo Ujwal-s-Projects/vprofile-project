@@ -5,128 +5,15 @@ def COLOR_MAP = [
 
 pipeline {
     agent any 
-   
-    tools {
-        jdk "JDK11"
-        maven "MAVEN3"
-    }
 
     environment {
-        NEXUS_USER="admin"
-        NEXUS_PASS="admin"
-        NEXUS_LOGIN="nexuslogin"
-        NEXUSIP="172.31.32.196"
-        NEXUSPORT="8081"
-        NEXUS_GRP_REPO="my-group"
-        CENTRAL_REPO="my-central"
-        RELEASE_REPO="my-release"
-        SONARSCANNER="sonar-scanner"
-        SONARSERVER="sonar-server"
-        REGISTRY_CREDS = "ecr:ap-south-1:aws_creds"
-        REGISTRY_REPO = "814495875142.dkr.ecr.ap-south-1.amazonaws.com/my-repo"
-        REGISTRY_URL = "https://814495875142.dkr.ecr.ap-south-1.amazonaws.com"
-        cluster = "staging-cluster"
-        service = "staging-svc"
+        cluster = "prod-cluster"
+        service = "prod-svc"
     }
 
     stages {
-        stage("Checkout") {
-            steps {
-                git branch: 'ci-jenkins', credentialsId: 'github-ssh-key', url: 'git@github.com:Ujwal-s-Projects/vprofile-project.git'
-                echo "success......................."
-            }
-        }
-
-        stage("Build") {
-            steps {
-                sh 'mvn -s settings.xml install -DskipTests'
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: '**/target/*.war'
-                }
-            }
-        }
-
-        stage("Unit-Test") {
-            steps {
-                sh 'mvn -s settings.xml test'
-            }
-        }
-
-        stage("Code-Analysis-Checkstyle") {
-            steps {
-                sh 'mvn -s settings.xml checkstyle:checkstyle'
-            }
-        }
-
-        stage('SonarQube-Analysis') {
-            environment {
-                scannerHome = tool "${SONARSCANNER}"
-            }
-            steps {
-                    withSonarQubeEnv("${SONARSERVER}") {
-                        sh '''${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=my-key \
-                        -Dsonar.projectName=my-project \
-                        -Dsonar.projectVersion=1.0 \
-                        -Dsonar.sources=src/ \
-                        -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                        -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                        -Dsonar.checkstyle.reportsPath=target/checkstyle-result.xml \
-                        -Dsonar.junit.reportsPath=target/surefire-reports/  
-                        '''
-                    }
-            }
-        }
-        stage("Quality_Gates") {
-            steps {
-                timeout(time: 10, unit: "MINUTES") {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        stage("Nexus_Artifact") {
-            steps {
-                nexusArtifactUploader(
-                    nexusVersion: 'nexus3',
-                    protocol: 'http',
-                    nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
-                    groupId: 'My-App',
-                    version: "${env.BUILD_ID}",
-                    repository: "${RELEASE_REPO}",
-                    credentialsId: "${NEXUS_LOGIN}",
-                    artifacts: [
-                        [artifactId: 'My-App',
-                         classifier: '',
-                         file: 'target/vprofile-v2.war',
-                         type: 'war']
-                    ]
-                )
-
-            }
-        }
-
-        stage("docker-build") {
-            steps {
-                script {
-                    dockerImage = docker.build( REGISTRY_REPO + ":$BUILD_NUMBER", "./Docker-files/app/multistage/")
-                }
-            }
-        }
-
-        stage("upload_image") {
-            steps {
-                script {
-                    docker.withRegistry(REGISTRY_URL, REGISTRY_CREDS) {
-                        dockerImage.push("$BUILD_NUMBER")
-                    }
-                }
-            }
-        }
         
-        stage ("Deploy_to_ECS") {
+        stage ("Deploy_To_Prod_ECS") {
             steps {
                 withAWS(credentials: "aws_creds", region: "ap-south-1") {
                     sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
@@ -141,6 +28,7 @@ pipeline {
             slackSend channel: '#jenkins-ci_cd',
                 color: COLOR_MAP[currentBuild.currentResult],
                 message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n more info at: ${env.BUILD_URL}"
+                echo "YOUR IMAGE SUCCESSFULLY DEPLOYED TO PRODUCTION ENVIRONMENT........"
         }
     }
 }
