@@ -7,19 +7,19 @@ pipeline {
     agent any 
    
     tools {
-        jdk "JDK11"
-        maven "MAVEN3"
+        jdk "jdk11"
+        maven "Maven3"
     }
 
     environment {
         NEXUS_USER="admin"
         NEXUS_PASS="admin"
-        NEXUS_LOGIN="nexuslogin"
+        NEXUS_LOGIN="nexus-login"
         NEXUSIP="172.31.32.196"
         NEXUSPORT="8081"
-        NEXUS_GRP_REPO="my-group"
-        CENTRAL_REPO="my-central"
-        RELEASE_REPO="my-release"
+        NEXUS_GRP_REPO="group"
+        CENTRAL_REPO="central"
+        RELEASE_REPO="release"
         SONARSCANNER="sonar-scanner"
         SONARSERVER="sonar-server"
         REGISTRY_CREDS = "ecr:ap-south-1:aws_creds"
@@ -32,7 +32,7 @@ pipeline {
     stages {
         stage("Checkout") {
             steps {
-                git branch: 'ci-jenkins', credentialsId: 'github-ssh-key', url: 'git@github.com:Ujwal-s-Projects/vprofile-project.git'
+                git branch: 'cicd-jenkins', credentialsId: "github-ssh", url: 'git@github.com:Ujwal-s-Projects/vprofile-project.git'
                 echo "success......................."
             }
         }
