@@ -22,6 +22,11 @@ pipeline {
         RELEASE_REPO="my-release"
         SONARSCANNER="sonar-scanner"
         SONARSERVER="sonar-server"
+        REGISTRY_CREDS = "ecr:ap-south-1:aws_creds"
+        REGISTRY_REPO = "814495875142.dkr.ecr.ap-south-1.amazonaws.com/my-repo"
+        REGISTRY_URL = "https://814495875142.dkr.ecr.ap-south-1.amazonaws.com"
+        cluster = "staging-cluster"
+        service = "staging-svc"
     }
 
     stages {
@@ -100,6 +105,32 @@ pipeline {
                     ]
                 )
 
+            }
+        }
+
+        stage("docker-build") {
+            steps {
+                script {
+                    dockerImage = docker.build( REGISTRY_REPO + ":$BUILD_NUMBER", "./Docker-files/app/multistage/")
+                }
+            }
+        }
+
+        stage("upload_image") {
+            steps {
+                script {
+                    docker.withRegistry(REGISTRY_URL, REGISTRY_CREDS) {
+                        dockerImage.push("$BUILD_NUMBER")
+                    }
+                }
+            }
+        }
+        
+        stage ("Deploy_to_ECS") {
+            steps {
+                withAWS(credentials: "aws_creds", region: "ap-south-1") {
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+                }
             }
         }
     }
