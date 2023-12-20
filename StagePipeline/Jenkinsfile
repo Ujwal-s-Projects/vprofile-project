@@ -15,18 +15,18 @@ pipeline {
         NEXUS_USER="admin"
         NEXUS_PASS="admin"
         NEXUS_LOGIN="nexus-login"
-        NEXUSIP="172.31.32.196"
-        NEXUSPORT="8081"
+        NEXUS_IP="172.31.32.196"
+        NEXUS_PORT="8081"
         NEXUS_GRP_REPO="group"
-        CENTRAL_REPO="central"
-        RELEASE_REPO="release"
-        SONARSCANNER="sonar-scanner"
-        SONARSERVER="sonar-server"
+        NEXUS_CENTRAL="central"
+        NEXUS_RELEASE="release"
+        SONAR_SCANNER="sonar-scanner"
+        SONAR_SERVER="sonar-server"
         REGISTRY_CREDS = "ecr:ap-south-1:aws_creds"
         REGISTRY_REPO = "814495875142.dkr.ecr.ap-south-1.amazonaws.com/my-repo"
         REGISTRY_URL = "https://814495875142.dkr.ecr.ap-south-1.amazonaws.com"
-        cluster = "staging-cluster"
-        service = "staging-svc"
+        CLUSTER = "staging-cluster"
+        SERVICE = "staging-svc"
     }
 
     stages {
@@ -62,10 +62,10 @@ pipeline {
 
         stage('SonarQube-Analysis') {
             environment {
-                scannerHome = tool "${SONARSCANNER}"
+                scannerHome = tool "${SONAR_SCANNER}"
             }
             steps {
-                    withSonarQubeEnv("${SONARSERVER}") {
+                    withSonarQubeEnv("${SONAR_SERVER}") {
                         sh '''${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=my-key \
                         -Dsonar.projectName=my-project \
@@ -92,10 +92,10 @@ pipeline {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
-                    nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
+                    nexusUrl: "${NEXUS_IP}:${NEXUS_PORT}",
                     groupId: 'My-App',
                     version: "${env.BUILD_ID}",
-                    repository: "${RELEASE_REPO}",
+                    repository: "${NEXUS_RELEASE}",
                     credentialsId: "${NEXUS_LOGIN}",
                     artifacts: [
                         [artifactId: 'My-App',
@@ -129,7 +129,7 @@ pipeline {
         stage ("Deploy_to_ECS") {
             steps {
                 withAWS(credentials: "aws_creds", region: "ap-south-1") {
-                    sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+                    sh 'aws ecs update-service --cluster ${CLUSTER} --service ${SERVICE} --force-new-deployment'
                 }
             }
         }
