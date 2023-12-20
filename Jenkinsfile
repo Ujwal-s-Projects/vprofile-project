@@ -1,78 +1,83 @@
 def COLOR_MAP = [
-    "SUCCESS": "good",
-    "FAILURE": "danger",
-    "ABORTED": "warning",
+    'SUCCESS': 'good',
+    'FAILURE': 'danger',
 ]
+
 pipeline {
-    agent any 
+    agent any
 
     tools {
-        jdk "jdk11"
-        maven "Maven3"
+        jdk 'jdk11'
+        maven 'MAVEN3'
     }
 
     environment {
-        SONAR_SCANNER = tool "sonar-scanner"
-        SONAR_SERVER = "sonar-server"
-        NEXUS_LOGIN = "nexus-login"
-        NEXUS_USER = "admin"
-        NEXUS_PASS = "admin"
-        NEXUS_IP = "172.31.42.81"
-        NEXUS_PORT = "8081"
-        NEXUS_GRP_REPO = "group"
-        NEXUS_RELEASE = "release"
-        NEXUS_CENTRAL = "central"
-        NEXUS_SNAP = "snap"
+        NEXUS_USER = 'admin'
+        NEXUS_PASS = 'admin123'
+        NEXUS_LOGIN = 'nexus-login'
+        NEXUSIP = '172.31.10.238'
+        NEXUSPORT = '8081'
+        NEXUS_GRP_REPO = 'group-repo'
+        RELEASE_REPO = 'release-repo'
+        SNAP_REPO = 'snap-repo'
+        CENTRAL_REPO = 'central-repo'
+        SONARSCANNER = 'sonar-scanner'
+        SONARSERVER = 'sonar-server'
     }
 
     stages {
-        stage("Checkout") {
+        stage('Checkout') {
             steps {
-                git branch: "ci-jenkins", credentialsId: "github-ssh", url: "git@github.com:Ujwal-s-Projects/vprofile-project.git" 
+                git branch: 'ci-jenkins', credentialsId: 'github-ssh-connection', url: 'git@github.com:Ujwal-s-Projects/vprofile-project.git'
+                echo 'success.......................'
             }
         }
 
-        stage("Build") {
+        stage('Build') {
             steps {
-                sh "mvn -s settings.xml -DskipTests install"
+                sh 'mvn -s settings.xml clean install -DskipTests'
             }
             post {
                 success {
-                    archiveArtifacts artifacts: "**/target/*.war"
+                    archiveArtifacts artifacts: '**/target/*.war'
                 }
             }
         }
 
-        stage("Unit_Test") {
+        stage('Unit-Test') {
             steps {
-                sh "mvn -s settings.xml test"
+                sh 'mvn -s settings.xml test'
             }
         }
 
-        stage("Checkstyle_Test") {
+        stage('Code-Analysis-Checkstyle') {
             steps {
-                sh "mvn -s settings.xml checkstyle:checkstyle"
+                sh 'mvn -s settings.xml checkstyle:checkstyle'
             }
         }
 
-        stage("Code_Analysis") {
+        stage('SonarQube-Analysis') {
+            environment {
+                scannerHome = tool "${SONARSCANNER}"
+            }
             steps {
-                withSonarQubeEnv("${SONAR_SERVER}") {
-                    sh ''' ${SONAR_SCANNER}/bin/sonar-scanner \
-                    -Dsonar.projectKey=vpro-key \
-                    -Dsonar.projectName=vpro-project \
-                    -Dsonar.projectVersion=1.0 \
-                    -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                    -Dsonar.checkstyle.reportsPath=target/checkstyle-results.xml \
-                    -Dsonar.junit.reportsPath=target/surefire-reports/ '''
-                }
+                    withSonarQubeEnv("${SONARSERVER}") {
+                        sh '''${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=my-key \
+                        -Dsonar.projectName=my-project \
+                        -Dsonar.projectVersion=1.0 \
+                        -Dsonar.sources=src/ \
+                        -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                        -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                        -Dsonar.checkstyle.reportsPath=target/checkstyle-result.xml \
+                        -Dsonar.junit.reportsPath=target/surefire-reports/
+                        '''
+                    }
             }
         }
-
         stage("Quality_Gates") {
             steps {
-                timeout(10){
+                timeout(time: 10, unit: "MINUTES") {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -83,29 +88,31 @@ pipeline {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
-                    nexusUrl: "${NEXUS_IP}:${NEXUS_PORT}",
-                    groupId: 'Vprofile-App',
-                    version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
-                    repository: "${NEXUS_RELEASE}",
+                    nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
+                    groupId: 'My-App',
+                    version: "${env.BUILD_ID}",
+                    repository: "${RELEASE_REPO}",
                     credentialsId: "${NEXUS_LOGIN}",
                     artifacts: [
-                        [artifactId: 'vpro-app',
-                        classifier: '',
-                        file: 'target/vprofile-v2.war',
-                        type: 'war']
+                        [artifactId: 'My-App',
+                         classifier: '',
+                         file: 'target/vprofile-v2.war',
+                         type: 'war']
                     ]
                 )
+
             }
         }
     }
 
     post {
         always {
-            script {
-                slackSend channel: '#jenkins',
-                    color: COLOR_MAP[currentBuild.currentResult],
-                    message: "${currentBuild.currentResult}: ${env.JOB_NAME} - ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
-            }
+               script {
+            echo 'slack notification'
+            slackSend channel: '#jenkins-ci_cd',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n more info at: ${env.BUILD_URL}"
         }
+     }
     }
 }
