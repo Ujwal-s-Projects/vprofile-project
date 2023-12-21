@@ -109,7 +109,7 @@ pipeline {
             }
         }
 
-        stage("docker-build") {
+        stage("Build_Docker_Img") {
             steps {
                 script {
                     dockerImage = docker.build( REGISTRY_REPO + ":$BUILD_NUMBER", "./Docker-files/app/multistage/")
@@ -117,12 +117,20 @@ pipeline {
             }
         }
 
-        stage("upload_image") {
+        stage("Upload_Img_To_ECR") {
             steps {
                 script {
                     docker.withRegistry(REGISTRY_URL, REGISTRY_CREDS) {
                         dockerImage.push("$BUILD_NUMBER")
                     }
+                }
+            }
+        }
+        
+        stage ("Deploy_To_Stage_ECS") {
+            steps {
+                withAWS(credentials: "aws_creds", region: "ap-south-1") {
+                    sh 'aws ecs update-service --cluster ${CLUSTER} --service ${SERVICE} --force-new-deployment'
                 }
             }
         }
